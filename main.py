@@ -104,7 +104,6 @@ def links(url, d_):
                 article.parse()
             except newspaper.article.ArticleException:
                 continue
-            print(len(d['links_all']))
             d['text'] = d['text'] + scrape_all(article)
             d['links_all'].append(article.url)
     return d
@@ -116,10 +115,12 @@ def go(url, col):
     while col != -1:
         if col_f == col:
             dict_o = links(url, dict_)
+            print(len(dict_o['links_all']))
         else:
             for el in dict_o['links_all']:
-                dict_o = links(el, dict_)
+                dict_o = dict_o + links(el, dict_)
                 dict_o['text'] = dict_o['text']
+                print(len(dict_o['links_all']))
         col = col - 1
     return dict_o
 
