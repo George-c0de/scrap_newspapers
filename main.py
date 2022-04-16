@@ -9,23 +9,22 @@ from docx import Document
 
 
 def doc(path):
+    doc_text = ""
     document = Document(path)
-    # Регулярка для поиска последовательностей пробелов: от двух подряд и более
     multi_space_pattern = re.compile(r'\s{2,}')
     for table in document.tables:
         for row in table.rows:
             name, weight, price = [multi_space_pattern.sub(' ', i.text.strip()) for i in row.cells]
 
             if name == weight == price or (not weight or not price):
-                print()
+                doc_text = doc_text + "\n"
                 name = name.title()
-                print(name)
+                doc_text = doc_text + name
                 continue
 
-            print('{} {} {}'.format(name, weight, price))
-
-        # Таблицы в меню дублируются
+            doc_text = doc_text + '{} {} {}'.format(name, weight, price)
         break
+    return doc_text
 
 
 def extract_text_from_pdf(pdf_path):
@@ -58,15 +57,15 @@ def serch_(str_, start):
 
 
 def lang(st):
-    n = 0
+    flag = 0
     k = ""
     default = "ru"
     for el in st:
         if el == "/":
-            n = n + 1
+            flag = flag + 1
             continue
-        if n >= 3:
-            if n == 4:
+        if flag >= 3:
+            if flag == 4:
                 if len(k) > 2:
                     return default
                 else:
@@ -109,22 +108,38 @@ def go(url, col):
     return b
 
 
-print("1. Scrap web\n2.Scrap file\n3.Scrap doc\nEnter:\n>\n")
-ch = int(input())
-match ch:
-    case 1:
-        print("Enter url \n>")
-        url_ = input()
-        print("and number scrape\n>")
-        n = int(input())
-        a = go(url_, n)
-    case 2:
-        print("Enter url \n>")
-        url_ = input()
-        print(extract_text_from_pdf(url_))
-    case 3:
-        print("Enter url \n>")
-        url_ = input()
-        print(doc(url_))
+def save_txt(text_):
+    if isinstance(text_, str):
+        with open("save.txt", "w", encoding="utf-8") as file:
+            file.write(text_)
+    else:
+        with open("save.txt", "w", encoding="utf-8") as file:
+            for el in text_:
+                file.write(el + "\n")
+    print("Файл успешно сохранен")
 
 
+def main():
+    print("1. Scrap web\n2.Scrap file\n3.Scrap doc\nEnter:\n>\n")
+    ch = int(input())
+    match ch:
+        case 1:
+            print("Enter url \n>")
+            url_ = input()
+            print("and number scrape\n>")
+            n = int(input())
+            a = go(url_, n)
+            return a
+        case 2:
+            print("Enter url \n>")
+            url_ = input()
+            a = extract_text_from_pdf(url_)
+            return a
+        case 3:
+            print("Enter url \n>")
+            url_ = input()
+            a = doc(url_)
+            return a
+
+
+save_txt(main())
