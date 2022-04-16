@@ -115,12 +115,11 @@ def go(url, col):
     while col != -1:
         if col_f == col:
             dict_o = links(url, dict_)
-            print(len(dict_o['links_all']))
         else:
             for el in dict_o['links_all']:
-                dict_o = dict_o + links(el, dict_)
-                dict_o['text'] = dict_o['text']
-                print(len(dict_o['links_all']))
+                new_d = links(el, dict_)
+                dict_o['text'] = dict_o['text'] + new_d['text']
+                dict_o['links_all'] = dict_o['links_all'] + new_d['links_all']
         col = col - 1
     return dict_o
 
