@@ -86,7 +86,6 @@ def mask(url):
 
 def links(url, d_):
     c = []
-    print(d_)
     cnn_paper = newspaper.build(url, memoize_articles=False, language=d_['language'])
     for article in cnn_paper.articles:
         if serch_(article.url, d_["url"]) or d_["flag"]:
@@ -98,7 +97,6 @@ def go(url, col):
     b = []
     dict_ = mask(url)
     while col != -1:
-        print(len(b))
         if len(b) == 0:
             b = b + links(url, dict_)
         else:
