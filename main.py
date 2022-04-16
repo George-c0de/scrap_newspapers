@@ -99,22 +99,25 @@ def links(url, d_):
     cnn_paper = newspaper.build(url, memoize_articles=False, language=d_['language'])
     for article in cnn_paper.articles:
         if serch_(article.url, d_["url"]) or d_["flag"]:
-            article.download()
-            article.parse()
+            try:
+                article.download()
+                article.parse()
+            except newspaper.article.ArticleException:
+                continue
+            print(len(d['links_all']))
             d['text'] = d['text'] + scrape_all(article)
-            d['links_all'] = article.url
+            d['links_all'].append(article.url)
     return d
 
 
 def go(url, col):
-    dict_o = {'links_all': [], 'text': []}
+    col_f = col
     dict_ = mask(url)
     while col != -1:
-        if len(dict_o['text']) == 0:
+        if col_f == col:
             dict_o = links(url, dict_)
-            dict_o['text'] = dict_o['text']
         else:
-            for el in dict_o['text']:
+            for el in dict_o['links_all']:
                 dict_o = links(el, dict_)
                 dict_o['text'] = dict_o['text']
         col = col - 1
