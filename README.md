@@ -152,3 +152,29 @@ def go(url, col):
 9. def main()
 + Главная функция, 
 которая отвечает за визуальное представление программы
+```
+def main():
+    print("1. Scrap web\n2.Scrap file\n3.Scrap doc\nEnter:\n>\n")
+    ch = int(input())
+    match ch:
+        case 1:
+            print("Enter url \n>")
+            url_ = input()
+            print("and number scrape\n>")
+            n = int(input())
+            a = go(url_, n)
+            save_txt(a)
+            return a
+        case 2:
+            print("Enter url \n>")
+            url_ = input()
+            a = extract_text_from_pdf(url_)
+            save_txt(a)
+            return a
+        case 3:
+            print("Enter url \n>")
+            url_ = input()
+            a = doc(url_)
+            save_txt(a)
+            return a
+```
