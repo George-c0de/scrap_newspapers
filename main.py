@@ -116,7 +116,15 @@ def save_txt(text_):
         with open("save.txt", "w", encoding="utf-8") as file:
             for el in text_:
                 file.write(el + "\n")
-    print("Файл успешно сохранен")
+    print("Необработанный файл сохранен")
+    if isinstance(text_, str):
+        with open("save2.txt", "w", encoding="utf-8") as file:
+            file.write(text_)
+    else:
+        with open("save2.txt", "w", encoding="utf-8") as file:
+            for el in text_:
+                file.write(el)
+    print("Обработанный файл сохранен")
 
 
 def main():
