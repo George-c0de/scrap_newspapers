@@ -40,8 +40,6 @@ def extract_text_from_pdf(pdf_path):
             page_interpreter.process_page(page)
 
         text = fake_file_handle.getvalue()
-
-    # close open handles
     converter.close()
     fake_file_handle.close()
 
@@ -84,26 +82,46 @@ def mask(url):
     return sp
 
 
+def scrape_all(article):
+    c_2 = [article.title]
+    for l_ in article.authors:
+        c_2.append(l_)
+    c_2.append(str(article.publish_date))
+    c_2.append(article.text)
+    c_2.append(article.url)
+    return c_2
+
+
 def links(url, d_):
+    links_all = []
     c = []
+    d = {'links_all': links_all, 'text': c}
     cnn_paper = newspaper.build(url, memoize_articles=False, language=d_['language'])
     for article in cnn_paper.articles:
         if serch_(article.url, d_["url"]) or d_["flag"]:
-            c.append(article.url)
-    return c
+            try:
+                article.download()
+                article.parse()
+            except newspaper.article.ArticleException:
+                continue
+            d['text'] = d['text'] + scrape_all(article)
+            d['links_all'].append(article.url)
+    return d
 
 
 def go(url, col):
-    b = []
+    col_f = col
     dict_ = mask(url)
     while col != -1:
-        if len(b) == 0:
-            b = b + links(url, dict_)
+        if col_f == col:
+            dict_o = links(url, dict_)
         else:
-            for el in b:
-                b = b + links(el, dict_)
+            for el in dict_o['links_all']:
+                new_d = links(el, dict_)
+                dict_o['text'] = dict_o['text'] + new_d['text']
+                dict_o['links_all'] = dict_o['links_all'] + new_d['links_all']
         col = col - 1
-    return b
+    return dict_o
 
 
 def save_txt(text_):
@@ -113,7 +131,8 @@ def save_txt(text_):
     else:
         with open("save.txt", "w", encoding="utf-8") as file:
             for el in text_:
-                file.write(el + "\n")
+                if el is not None:
+                    file.write(el + "\n")
     print("Необработанный файл сохранен")
     if isinstance(text_, str):
         with open("save2.txt", "w", encoding="utf-8") as file:
@@ -121,7 +140,8 @@ def save_txt(text_):
     else:
         with open("save2.txt", "w", encoding="utf-8") as file:
             for el in text_:
-                file.write(el)
+                if el is not None:
+                    file.write(el)
     print("Обработанный файл сохранен")
 
 
@@ -135,22 +155,21 @@ def main():
             print("and number scrape\n>")
             n = int(input())
             a = go(url_, n)
-            save_txt(a)
+            save_txt(a['text'])
             return a
         case 2:
             print("Enter url \n>")
             url_ = input()
             a = extract_text_from_pdf(url_)
-            save_txt(a)
+            save_txt(a['text'])
             return a
         case 3:
             print("Enter url \n>")
             url_ = input()
             a = doc(url_)
-            save_txt(a)
+            save_txt(a['text'])
             return a
 
 
 if __name__ == "__main__":
     main()
-
