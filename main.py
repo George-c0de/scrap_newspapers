@@ -1,5 +1,5 @@
-import newspaper
 import io
+import newspaper
 from pdfminer.converter import TextConverter
 from pdfminer.pdfinterp import PDFPageInterpreter
 from pdfminer.pdfinterp import PDFResourceManager
@@ -78,46 +78,54 @@ def mask(url):
         num = url.find("*")
         url = url[0:num]
         flag = False
+
     sp = {"language": lan, "url": url, "flag": flag}
     return sp
 
 
-def scrape_all(article):
-    c_2 = [article.title]
+def scrape_all(article, url):
+    c_2 = []
+    c_2.append(article.title)
     for l_ in article.authors:
         c_2.append(l_)
     c_2.append(str(article.publish_date))
     c_2.append(article.text)
-    c_2.append(article.url)
+    c_2.append(url)
     return c_2
 
 
-def links(url, d_):
+def links(url, d_, fl):
     links_all = []
     c = []
     d = {'links_all': links_all, 'text': c}
+    article = newspaper.Article(url)
+    try:
+        article.download()
+        article.parse()
+    except newspaper.article.ArticleException:
+        return d
+    d['text'] = d['text'] + scrape_all(article, url)
     cnn_paper = newspaper.build(url, memoize_articles=False, language=d_['language'])
-    for article in cnn_paper.articles:
-        if serch_(article.url, d_["url"]) or d_["flag"]:
-            try:
-                article.download()
-                article.parse()
-            except newspaper.article.ArticleException:
-                continue
-            d['text'] = d['text'] + scrape_all(article)
+    if fl:
+        for article in cnn_paper.articles:
             d['links_all'].append(article.url)
     return d
 
 
 def go(url, col):
     col_f = col
+    flag = False
     dict_ = mask(url)
     while col != -1:
         if col_f == col:
-            dict_o = links(url, dict_)
+            if (col-1) != -1:
+                flag = True
+            dict_o = links(url, dict_, flag)
         else:
+            if (col-1) != -1:
+                flag = True
             for el in dict_o['links_all']:
-                new_d = links(el, dict_)
+                new_d = links(el, dict_, flag)
                 dict_o['text'] = dict_o['text'] + new_d['text']
                 dict_o['links_all'] = dict_o['links_all'] + new_d['links_all']
         col = col - 1
