@@ -78,7 +78,6 @@ def mask(url):
         num = url.find("*")
         url = url[0:num]
         flag = False
-
     sp = {"language": lan, "url": url, "flag": flag}
     return sp
 
@@ -142,14 +141,22 @@ def save_txt(text_):
                 if el is not None:
                     file.write(el + "\n")
     print("Необработанный файл сохранен")
+    a = ""
+    for el in text_:
+        a = a + el
+        a = a.replace(' ', '')
+        a = a.replace('\n', '')
+        a = a.replace('▍', '')
+        a = a.lower()
+        a = a.replace('none', '')
     if isinstance(text_, str):
         with open("save2.txt", "w", encoding="utf-8") as file:
-            file.write(text_)
+            b = text_.replace(' ', '')
+            b = b.lower()
+            file.write(b)
     else:
         with open("save2.txt", "w", encoding="utf-8") as file:
-            for el in text_:
-                if el is not None:
-                    file.write(el)
+            file.write(a)
     print("Обработанный файл сохранен")
 
 
