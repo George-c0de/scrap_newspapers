@@ -15,13 +15,11 @@ def doc(path):
     for table in document.tables:
         for row in table.rows:
             name, weight, price = [multi_space_pattern.sub(' ', i.text.strip()) for i in row.cells]
-
             if name == weight == price or (not weight or not price):
                 doc_text = doc_text + "\n"
                 name = name.title()
                 doc_text = doc_text + name
                 continue
-
             doc_text = doc_text + '{} {} {}'.format(name, weight, price)
         break
     return doc_text
@@ -32,7 +30,6 @@ def extract_text_from_pdf(pdf_path):
     fake_file_handle = io.StringIO()
     converter = TextConverter(resource_manager, fake_file_handle)
     page_interpreter = PDFPageInterpreter(resource_manager, converter)
-
     with open(pdf_path, 'rb') as fh:
         for page in PDFPage.get_pages(fh,
                                       caching=True,
@@ -82,6 +79,25 @@ def mask(url):
     return sp
 
 
+def name_go(name):
+    name = name.replace(' ', '')
+    name = name.replace('/', '')
+    name = name.replace('\\', '')
+    name = name.replace(':', '')
+    name = name.replace('*', '')
+    name = name.replace('?', '')
+    name = name.replace('"', '')
+    name = name.replace('<', '')
+    name = name.replace('>', '')
+    name = name.replace('|', '')
+    return name
+
+
+def save_article(a, name):
+    with open(name, "w", encoding="utf-8") as file:
+        file.write(a)
+
+
 def scrape_all(article, url):
     c_2 = []
     c_2.append(article.title)
@@ -90,6 +106,14 @@ def scrape_all(article, url):
     c_2.append(str(article.publish_date))
     c_2.append(article.text)
     c_2.append(url)
+    text = article.text
+    text = text.replace('▍', '')
+    text = text.replace('none', '')
+    text = text.replace('None', '')
+    a = str(article.publish_date) + text + url
+    name = article.title + ".txt"
+    name = name_go(name)
+    save_article(a, name)
     return c_2
 
 
