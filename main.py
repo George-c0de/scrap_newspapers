@@ -6,6 +6,30 @@ from pdfminer.pdfinterp import PDFResourceManager
 from pdfminer.pdfpage import PDFPage
 import re
 from docx import Document
+import psycopg2
+from psycopg2 import Error
+
+
+def connect_pg(dbname_, user_, password_, host_, port_):
+    conn = psycopg2.connect(dbname=dbname_, user=user_,
+                            password=password_, host=host_, port=port_)
+    return conn
+
+
+def insert(conn, a):
+    try:
+        cursor = conn.cursor()
+        postgres_insert_query = """INSERT INTO "Articles" (text_art) VALUES (%s);"""
+        a = a[:254]
+        record_to_insert = a
+        cursor.execute(postgres_insert_query, (record_to_insert,))
+        conn.commit()
+    except(Exception, Error) as error:
+        print("Ошибка при работе с PostgreSQL", error)
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
 
 
 def doc(path):
@@ -94,11 +118,28 @@ def name_go(name):
 
 
 def save_article(a, name):
-    with open(name, "w", encoding="utf-8") as file:
+    with open("статьи/" + name + ".txt", "w", encoding="utf-8") as file:
         file.write(a)
+    with open("статьи/clear/" + name + "_clear.txt", "w", encoding="utf-8") as file:
+        for el in a:
+            a = a + el
+            a = a.replace(' ', '')
+            a = a.replace('\n', '')
+            a = a.replace('▍', '')
+            a = a.lower()
+            a = a.replace('none', '')
+        file.write(a)
+        a = "".join(a)
+    dbname_ = "scrap"
+    user_ = "postgres"
+    password_ = "123"
+    host_ = "127.0.0.1"
+    port_ = "5432"
+    conn = connect_pg(dbname_, user_, password_, host_, port_)
+    insert(conn, a)
 
 
-def scrape_all(article, url):
+def scrape_all(article):
     c_2 = []
     c_2.append(article.title)
     for l_ in article.authors:
@@ -110,7 +151,7 @@ def scrape_all(article, url):
     text = text.replace('none', '')
     text = text.replace('None', '')
     a = str(article.publish_date) + text
-    name = article.title + ".txt"
+    name = article.title
     name = name_go(name)
     save_article(a, name)
     return c_2
@@ -126,7 +167,7 @@ def links(url, d_, fl):
         article.parse()
     except newspaper.article.ArticleException:
         return d
-    d['text'] = d['text'] + scrape_all(article, url)
+    d['text'] = d['text'] + scrape_all(article)
     cnn_paper = newspaper.build(url, memoize_articles=False, language=d_['language'])
     if fl:
         for article in cnn_paper.articles:
@@ -140,11 +181,11 @@ def go(url, col):
     dict_ = mask(url)
     while col != -1:
         if col_f == col:
-            if (col-1) != -1:
+            if (col - 1) != -1:
                 flag = True
             dict_o = links(url, dict_, flag)
         else:
-            if (col-1) != -1:
+            if (col - 1) != -1:
                 flag = True
             for el in dict_o['links_all']:
                 new_d = links(el, dict_, flag)
@@ -154,6 +195,7 @@ def go(url, col):
     return dict_o
 
 
+'''
 def save_txt(text_):
     if isinstance(text_, str):
         with open("save.txt", "w", encoding="utf-8") as file:
@@ -181,6 +223,7 @@ def save_txt(text_):
         with open("save2.txt", "w", encoding="utf-8") as file:
             file.write(a)
     print("Обработанный файл сохранен")
+'''
 
 
 def main():
@@ -193,21 +236,22 @@ def main():
             print("and number scrape\n>")
             n = int(input())
             a = go(url_, n)
-            save_txt(a['text'])
+            # save_txt(a['text'])
             return a
         case 2:
             print("Enter url \n>")
             url_ = input()
             a = extract_text_from_pdf(url_)
-            save_txt(a['text'])
+            # save_txt(a['text'])
             return a
         case 3:
             print("Enter url \n>")
             url_ = input()
             a = doc(url_)
-            save_txt(a['text'])
+            #  save_txt(a['text'])
             return a
 
 
 if __name__ == "__main__":
     main()
+    print("Все прошло успешно")
