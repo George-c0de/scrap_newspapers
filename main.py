@@ -105,12 +105,11 @@ def scrape_all(article, url):
         c_2.append(l_)
     c_2.append(str(article.publish_date))
     c_2.append(article.text)
-    c_2.append(url)
     text = article.text
     text = text.replace('▍', '')
     text = text.replace('none', '')
     text = text.replace('None', '')
-    a = str(article.publish_date) + text + url
+    a = str(article.publish_date) + text
     name = article.title + ".txt"
     name = name_go(name)
     save_article(a, name)
