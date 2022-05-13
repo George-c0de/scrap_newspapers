@@ -178,3 +178,29 @@ def main():
             save_txt(a)
             return a
 ```
+# Работа с БД PostgreSql
+___
++ Создадим Бд scrap
++ Добавим таблицу Articles
++ Столбец Id
++ Столбец text_art типа text
++ Добавим расширение в нашу БД 
+  + ```
+    CREATE EXTENSION fuzzystrmatch;
+    ```
++ Добавим триггер, который будет проверять повторение статьи с помощью функции levenshtein
+  + ```
+    CREATE FUNCTION emp_stamp() RETURNS trigger AS $emp_stamp$
+    BEGIN
+        IF (SELECT EXISTS(SELECT text_art FROM "Articles" WHERE levenshtein(text_art, NEW.text_art) <= 100)) THEN
+            RAISE EXCEPTION 'Такая статья уже существует';
+        END IF;
+   
+        RETURN NEW;
+    END;
+    $emp_stamp$ LANGUAGE plpgsql;
+
+    CREATE TRIGGER emp_stamp BEFORE INSERT OR UPDATE ON "Articles"
+    FOR EACH ROW EXECUTE PROCEDURE emp_stamp();
+    ```
+    
