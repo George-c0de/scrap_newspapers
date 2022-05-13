@@ -6,7 +6,7 @@ ___
 1. Обработка docx файлов def doc(path)
   + Данная функция обрабатывает структурированные файлы, 
 принимает ссылку на файл 
-```
+```pycon
   def doc(path):
          doc_text = ""
          document = Document(path)
@@ -28,7 +28,7 @@ ___
 + Данная функция обрабатывает файлы типа pdf, 
   - Принимает ссылку на файл 
   - Возвращает строку 
-```
+```pycon
    def extract_text_from_pdf(pdf_path):
     resource_manager = PDFResourceManager()
     fake_file_handle = io.StringIO()
@@ -56,7 +56,7 @@ ___
 + Принимает 2 параметра 
   + str_ - адрес веб страницы
   + start - маска
-```
+```pycon
 def serch_(str_, start):
     if str_.startswith(start):
         return True
@@ -67,7 +67,7 @@ def serch_(str_, start):
 + Данная функция определяет язык поиска статей. 
   + Если пользователь не вводил язык для поиска, 
   то берется значение по умолчанию - ru
-```
+```pycon
 def lang(st):
     flag = 0
     k = ""
@@ -88,7 +88,7 @@ def lang(st):
 + Данная функция создает словарь маски с нужными нам значениями, 
 язык поиска, маска или ее отсутствие 
   + flag указываеть была ли задана маска
-```
+```pycon
 def mask(url):
     lan = lang(url)
     flag = True
@@ -102,7 +102,7 @@ def mask(url):
 6. def links(url, d_, fl)
 + Функция проводит парсинг ссылок в статье, 
 с использованием маски 
-```
+```pycon
 def links(url, d_, fl):
     links_all = []
     c = []
@@ -122,7 +122,7 @@ def links(url, d_, fl):
 ```
 7. def go(url, col)
 + Функция отвечает за глубину поиска
-```
+```pycon
 def go(url, col):
     col_f = col
     flag = False
@@ -144,7 +144,7 @@ def go(url, col):
 ```
 8. def save_article(a, name)
 + Функция сохраняет 2 файла, обработанный и необработанный файл.
-  ```
+  ```pycon
   def save_article(a, name):
     with open("статьи/" + name + ".txt", "w", encoding="utf-8") as file:
         file.write(a)
@@ -169,7 +169,7 @@ def go(url, col):
 9. def main()
 + Главная функция, 
 которая отвечает за визуальное представление программы
-```
+```pycon
 def main():
     print("1. Scrap web\n2.Scrap file\n3.Scrap doc\nEnter:\n>\n")
     ch = int(input())
@@ -194,7 +194,7 @@ def main():
 ```
 10. def name_go(name):
 + Функция очистки из названия статьи всех спецсимволов
-```
+```pycon
 def name_go(name):
     name = name.replace(' ', '')
     name = name.replace('/', '')
@@ -210,7 +210,7 @@ def name_go(name):
 ```
 11. def connect_pg(dbname_, user_, password_, host_, port_)
 + Создание подключение к нашей БД  
-```python
+```pycon
 def connect_pg(dbname_, user_, password_, host_, port_):
     conn = psycopg2.connect(dbname=dbname_, user=user_,
                             password=password_, host=host_, port=port_)
@@ -218,7 +218,7 @@ def connect_pg(dbname_, user_, password_, host_, port_):
 ```
 12. def insert(conn, a)
 + Добавление в нашу базу данных
-```python
+```pycon
     try:
         cursor = conn.cursor()
         postgres_insert_query = """INSERT INTO "Articles" (text_art) VALUES (%s);"""
