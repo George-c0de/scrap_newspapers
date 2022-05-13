@@ -99,55 +99,72 @@ def mask(url):
     sp = {"language": lan, "url": url, "flag": flag}
     return sp
 ```
-6. def links(url, d_)
+6. def links(url, d_, fl)
 + Функция проводит парсинг ссылок в статье, 
 с использованием маски 
 ```
-def links(url, d_):
+def links(url, d_, fl):
+    links_all = []
     c = []
+    d = {'links_all': links_all, 'text': c}
+    article = newspaper.Article(url)
+    try:
+        article.download()
+        article.parse()
+    except newspaper.article.ArticleException:
+        return d
+    d['text'] = d['text'] + scrape_all(article)
     cnn_paper = newspaper.build(url, memoize_articles=False, language=d_['language'])
-    for article in cnn_paper.articles:
-        if serch_(article.url, d_["url"]) or d_["flag"]:
-            c.append(article.url)
-    return c
+    if fl:
+        for article in cnn_paper.articles:
+            d['links_all'].append(article.url)
+    return d
 ```
 7. def go(url, col)
 + Функция отвечает за глубину поиска
 ```
 def go(url, col):
-    b = []
+    col_f = col
+    flag = False
     dict_ = mask(url)
     while col != -1:
-        if len(b) == 0:
-            b = b + links(url, dict_)
+        if col_f == col:
+            if (col - 1) != -1:
+                flag = True
+            dict_o = links(url, dict_, flag)
         else:
-            for el in b:
-                b = b + links(el, dict_)
+            if (col - 1) != -1:
+                flag = True
+            for el in dict_o['links_all']:
+                new_d = links(el, dict_, flag)
+                dict_o['text'] = dict_o['text'] + new_d['text']
+                dict_o['links_all'] = dict_o['links_all'] + new_d['links_all']
         col = col - 1
-    return b
+    return dict_o
 ```
-8. def save_txt(text_)
+8. def save_article(a, name)
 + Функция сохраняет 2 файла, обработанный и необработанный файл.
-  + Принимает один параметр в случае с парсингом файла - строку, 
-  + в случае с парсингом веб страницы - список
   ```
-  def save_txt(text_):
-    if isinstance(text_, str):
-        with open("save.txt", "w", encoding="utf-8") as file:
-            file.write(text_)
-    else:
-        with open("save.txt", "w", encoding="utf-8") as file:
-            for el in text_:
-                file.write(el + "\n")
-    print("Необработанный файл сохранен")
-    if isinstance(text_, str):
-        with open("save2.txt", "w", encoding="utf-8") as file:
-            file.write(text_)
-    else:
-        with open("save2.txt", "w", encoding="utf-8") as file:
-            for el in text_:
-                file.write(el)
-    print("Обработанный файл сохранен")
+  def save_article(a, name):
+    with open("статьи/" + name + ".txt", "w", encoding="utf-8") as file:
+        file.write(a)
+    with open("статьи/clear/" + name + "_clear.txt", "w", encoding="utf-8") as file:
+        for el in a:
+            a = a + el
+            a = a.replace(' ', '')
+            a = a.replace('\n', '')
+            a = a.replace('▍', '')
+            a = a.lower()
+            a = a.replace('none', '')
+        file.write(a)
+        a = "".join(a)
+    dbname_ = "scrap"
+    user_ = "postgres"
+    password_ = "123"
+    host_ = "127.0.0.1"
+    port_ = "5432"
+    conn = connect_pg(dbname_, user_, password_, host_, port_)
+    insert(conn, a)
   ```
 9. def main()
 + Главная функция, 
@@ -163,20 +180,58 @@ def main():
             print("and number scrape\n>")
             n = int(input())
             a = go(url_, n)
-            save_txt(a)
             return a
         case 2:
             print("Enter url \n>")
             url_ = input()
             a = extract_text_from_pdf(url_)
-            save_txt(a)
             return a
         case 3:
             print("Enter url \n>")
             url_ = input()
             a = doc(url_)
-            save_txt(a)
             return a
+```
+10. def name_go(name):
++ Функция очистки из названия статьи всех спецсимволов
+```
+def name_go(name):
+    name = name.replace(' ', '')
+    name = name.replace('/', '')
+    name = name.replace('\\', '')
+    name = name.replace(':', '')
+    name = name.replace('*', '')
+    name = name.replace('?', '')
+    name = name.replace('"', '')
+    name = name.replace('<', '')
+    name = name.replace('>', '')
+    name = name.replace('|', '')
+    return name
+```
+11. def connect_pg(dbname_, user_, password_, host_, port_)
++ Создание подключение к нашей БД  
+```python
+def connect_pg(dbname_, user_, password_, host_, port_):
+    conn = psycopg2.connect(dbname=dbname_, user=user_,
+                            password=password_, host=host_, port=port_)
+    return conn
+```
+12. def insert(conn, a)
++ Добавление в нашу базу данных
+```python
+    try:
+        cursor = conn.cursor()
+        postgres_insert_query = """INSERT INTO "Articles" (text_art) VALUES (%s);"""
+        a = a[:254]
+        record_to_insert = a
+        cursor.execute(postgres_insert_query, (record_to_insert,))
+        conn.commit()
+    except(Exception, Error) as error:
+        print("Ошибка при работе с PostgreSQL", error)
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
 ```
 # Работа с БД PostgreSql
 ___

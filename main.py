@@ -236,19 +236,16 @@ def main():
             print("and number scrape\n>")
             n = int(input())
             a = go(url_, n)
-            # save_txt(a['text'])
             return a
         case 2:
             print("Enter url \n>")
             url_ = input()
             a = extract_text_from_pdf(url_)
-            # save_txt(a['text'])
             return a
         case 3:
             print("Enter url \n>")
             url_ = input()
             a = doc(url_)
-            #  save_txt(a['text'])
             return a
 
 
