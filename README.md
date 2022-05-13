@@ -203,4 +203,7 @@ ___
     CREATE TRIGGER emp_stamp BEFORE INSERT OR UPDATE ON "Articles"
     FOR EACH ROW EXECUTE PROCEDURE emp_stamp();
     ```
-    
+# Структура хранения статей
+___
++ Создадим папку статьи, где будут храниться наши статьи 
++ В ней создадим папку clear, где будут храниться наши очищенные статьи 
