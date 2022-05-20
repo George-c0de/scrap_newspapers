@@ -1,4 +1,6 @@
 import io
+import os
+
 import newspaper
 from pdfminer.converter import TextConverter
 from pdfminer.pdfinterp import PDFPageInterpreter
@@ -46,6 +48,9 @@ def doc(path):
                 continue
             doc_text = doc_text + '{} {} {}'.format(name, weight, price)
         break
+    full_name = os.path.basename(doc_text)
+    name = os.path.splitext(full_name)[0]
+    save_article(doc_text, name)
     return doc_text
 
 
@@ -65,7 +70,11 @@ def extract_text_from_pdf(pdf_path):
     fake_file_handle.close()
 
     if text:
+        full_name = os.path.basename(pdf_path)
+        name = os.path.splitext(full_name)[0]
+        save_article(text, name)
         return text
+
 
 
 def serch_(str_, start):
