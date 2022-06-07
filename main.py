@@ -94,7 +94,7 @@ def lang(st):
             continue
         if flag >= 3:
             if flag == 4:
-                if len(k) > 2:
+                if len(k) != 2:
                     return default
                 else:
                     return k
@@ -170,10 +170,11 @@ def links(url, d_, fl):
     links_all = []
     c = []
     d = {'links_all': links_all, 'text': c}
-    article = newspaper.Article(url)
+    article = newspaper.Article(url, language='ru')
     try:
         article.download()
         article.parse()
+
     except newspaper.article.ArticleException:
         return d
     d['text'] = d['text'] + scrape_all(article)
